@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  django:
+    build: .
+    container_name: notification-service
+    command: >
+      bash -c "python manage.py makemigrations &&
+               python manage.py migrate &&
+               python manage.py runserver 0.0.0.0:8002"
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - "8002:8002"
