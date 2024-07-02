@@ -1,19 +1,25 @@
-FROM python:3
+# Build stage
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+FROM python:3.12-slim AS production
+
+WORKDIR /app
+
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+
+COPY --from=builder /app /app
 
 ENV PYTHONUNBUFFERED=1
 
-# Install necessary system packages, including tzdata
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        tzdata \
-    && rm -rf /var/lib/apt/lists/*
+RUN adduser --disabled-password --no-create-home appuser
+USER appuser
 
-# Set the timezone to Asia/Kolkata
-ENV TZ=Asia/Kolkata
-
-
-WORKDIR /usr/src/app
-
-COPY requirements.txt ./
-
-RUN pip install --upgrade pip && pip install -r requirements.txt
+EXPOSE 8002
