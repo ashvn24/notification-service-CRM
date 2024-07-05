@@ -12,11 +12,29 @@ services:
       - .:/app
     ports:
       - "8002:8002"
+    depends_on:
+      - db-notification
   
   queue:
     build: 
       context: .
       dockerfile: Dockerfile
     command: 'python consumer.py'
+    depends_on:
+      - db-notification
     environment:
       - CLOUDAMQP_URL=amqps://amjpxqaz:2_lHNNUatQZhMP5xbNO391K9-wx7GqMQ@puffin.rmq2.cloudamqp.com/amjpxqaz
+      - DJANGO_SETTINGS_MODULE=notification_service.settings
+
+  db-notification:
+    image: postgres
+    container_name: db-notification
+    environment:
+      - POSTGRES_DB=notification
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=0089ashi
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+
+volumes:
+  pgdata:
